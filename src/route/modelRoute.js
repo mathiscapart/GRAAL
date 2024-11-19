@@ -19,35 +19,37 @@ router.get('/:id', async (req, res) => {
 })
 
 router.post('/', async (req, res) => {
-    if (req.body.id) {
-        res.status(400).send(`Bad request: ID should not be provided, since it is determined automatically by the database.`)
-    } else {
-        await models.Models.create(req.body);
-        res.status(201).end();
-    }
+    await models.Models.create(req.body);
+    res.status(201).end('Model created successfully.');
 })
 
 router.put('/:id', async (req, res) => {
-    if (req.body.id) {
-        res.status(400).send('Bad request: ID should not be provided, since it is determined automatically by the database.')
-    }else{
+    const model = await models.Models.findByPk(getIdParam(req));
+
+    if (model){
         await models.Models.update(req.body, {
-            where: {
-                id: getIdParam(req)
-            }
-        });
-        res.status(200).end();
+                where: {
+                    id: getIdParam(req)
+                }
+            });
+            res.status(200).end('Model updated successfully.');
+    }else{
+        res.status(404).send('404 - Not Found')
     }
 })
 
 router.delete('/:id', async (req, res) => {
-    if (req.body.id) {
+    const model = await models.Models.findByPk(getIdParam(req));
+
+    if (model) {
         await models.Models.destroy({
             where: {
                 id: getIdParam(req)
             }
         });
-        res.status(200).end();
+        res.status(200).end('Model deleted successfully.');
+    }else{
+        res.status(404).send('404 - Not Found')
     }
 })
 

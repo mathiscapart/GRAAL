@@ -19,35 +19,37 @@ router.get('/:id', async (req, res) => {
 })
 
 router.post('/', async (req, res) => {
-    if (req.body.id) {
-        res.status(400).send(`Bad request: ID should not be provided, since it is determined automatically by the database.`)
-    } else {
-        await models.Marque.create(req.body);
-        res.status(201).end();
-    }
+    await models.Marque.create(req.body);
+    res.status(201).end('Marque created');
 })
 
 router.put('/:id', async (req, res) => {
-    if (req.body.id) {
-        res.status(400).send('Bad request: ID should not be provided, since it is determined automatically by the database.')
-    }else{
+    const marque = await models.Marque.findByPk(getIdParam(req));
+
+    if (marque) {
         await models.Marque.update(req.body, {
             where: {
                 id: getIdParam(req)
             }
         });
-        res.status(200).end();
+        res.status(200).end('Marque successfully updated');
+    }else{
+        res.status(404).send('404 - Not found');
     }
 })
 
 router.delete('/:id', async (req, res) => {
-    if (req.body.id) {
+    const marque = await models.Marque.findByPk(getIdParam(req));
+
+    if (marque) {
         await models.Marque.destroy({
             where: {
                 id: getIdParam(req)
             }
         });
-        res.status(200).end();
+        res.status(200).end('Marque successfully deleted.');
+    }else{
+        res.status(404).send('404 - Not found');
     }
 })
 

@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
+const errorMiddleware = require('../error/errorMiddleware');
 
 const myToken = function (req, res, next) {
     const authHeader = req.headers.authorization;
@@ -24,8 +25,12 @@ app.use(myToken)
 app.use(bodyParser.json());
 app.use('/car', carRouter);
 app.use('/client', clientRouter);
-app.use('/marque', marqueRouter);
+app.use('/brand', marqueRouter);
 app.use('/model', modelRouter);
 app.use('/reservation', reservationRouter);
+app.get('/error', () => {
+    throw new Error('This is a forced error!');
+});
+app.use(errorMiddleware)
 
 module.exports = app;

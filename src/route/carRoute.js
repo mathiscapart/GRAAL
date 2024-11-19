@@ -19,45 +19,49 @@ router.get('/:id', async (req, res) => {
 })
 
 router.post('/', async (req, res) => {
-    if (req.body.id) {
-        res.status(400).send(`Bad request: ID should not be provided, since it is determined automatically by the database.`)
-    } else {
-        const nbCar = await models.Car.findAll({
-            where: {
-                ModelId: req.body['ModelId']
-            }
-        })
-        const nbModel = await models.Models.findByPk(req.body['ModelId'])
-        if (nbCar.length > nbModel.dataValues['nbModel']){
-            res.status(200).end("No Model disponible");
-        }else{
-            await models.Car.create(req.body);
-            res.status(201).end();
+    const nbCar = await models.Car.findAll({
+        where: {
+            ModelId: req.body['ModelId']
         }
+    });
+
+    const nbModel = await models.Models.findByPk(req.body['ModelId']);
+
+    if (nbCar.length > nbModel.dataValues['nbModel']){
+        res.status(200).end("Nomber of Model is insufficient");
+    }else{
+        await models.Car.create(req.body);
+        res.status(201).end('Car create successfully');
     }
 })
 
 router.put('/:id', async (req, res) => {
-    if (req.body.id) {
-        res.status(400).send('Bad request: ID should not be provided, since it is determined automatically by the database.')
-    }else{
+    const car = await models.Car.findByPk(getIdParam(req));
+
+    if (car){
         await models.Car.update(req.body, {
             where: {
                 id: getIdParam(req)
             }
         });
-        res.status(200).end();
+        res.status(200).end('Car modify');
+    }else{
+        res.status(404).end('404 - Not Found')
     }
 })
 
 router.delete('/:id', async (req, res) => {
-    if (req.body.id) {
+    const car = await models.Car.findByPk(getIdParam(req));
+
+    if (car) {
         await models.Car.destroy({
             where: {
                 id: getIdParam(req)
             }
         });
-        res.status(200).end();
+        res.status(200).end('Car delete');
+    }else{
+        res.status(404).end('404 - Not Found');
     }
 })
 
