@@ -1,5 +1,6 @@
 const { models } = require('../models');
 const { getIdParam } = require('./getId');
+const {Op} = require('sequelize');
 const express = require('express');
 const router = express.Router();
 
@@ -42,8 +43,24 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
     const reservation = await models.Reservation.findByPk(getIdParam(req));
+    const carReservation = await models.Reservation.findAll({
+        where:{
+            "id": {[Op.notIn]: [getIdParam(req)]},
+            "CarId": req.body['CarId']
+        },
+    })
+
+    const startDate = new Date(req.body['startDate'])
+    const endDate = new Date(req.body['endDate'])
 
     if (reservation){
+        for (let i = 0; i < carReservation.length; i++) {
+            const startReservation = carReservation[i].dataValues['startDate']
+            const endReservation = carReservation[i].dataValues['endDate']
+            if( startDate >= startReservation && startDate <= endReservation || endDate >= startReservation && endDate <= endReservation){
+                return res.status(409).end("Reservation not possible");
+            }
+        }
         await models.Reservation.update(req.body, {
             where: {
                 id: getIdParam(req)
